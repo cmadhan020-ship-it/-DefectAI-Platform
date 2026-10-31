@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DefectAI | Autonomous Software Defect Prediction & Intelligent Testing</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">✦</span>
+        <div>Defect<span>AI</span><small>AUTONOMOUS QA PLATFORM</small></div>
+      </div>
+      <div class="side-label">WORKSPACE</div>
+      <button class="nav-item active" data-view="dashboard">▦ <span>Dashboard</span></button>
+      <button class="nav-item" data-view="projects">◫ <span>Projects</span></button>
+      <button class="nav-item" data-view="ast">⚡ <span>AST Code Analyzer</span></button>
+      <button class="nav-item" data-view="prediction">⌁ <span>Defect Prediction</span></button>
+      <button class="nav-item" data-view="benchmark">📊 <span>AI Model Benchmark</span></button>
+      <button class="nav-item" data-view="testing">✓ <span>Intelligent Testing</span></button>
+      <div class="sidebar-bottom">
+        <div class="user-avatar" id="sideAvatar">MC</div>
+        <div>
+          <b id="sideUser">Madhan C</b>
+          <small id="sideRole">Lead Administrator</small>
+        </div>
+        <button id="logoutBtn" title="Log out">↗</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">AUTONOMOUS SOFTWARE DEFECT PREDICTION & TESTING</div>
+          <h1 id="pageTitle">Overview</h1>
+        </div>
+        <div class="top-actions">
+          <span class="live-dot" id="systemStatus">AI Engine Active</span>
+          <button class="outline-btn" id="reportBtn">↓ Export CSV Report</button>
+        </div>
+      </header>
+
+      <!-- Auth Section -->
+      <section id="authPanel" class="auth-card">
+        <div>
+          <div class="eyebrow">AI-POWERED QUALITY ASSURANCE</div>
+          <h2>Autonomous Defect<br>Prediction & <em>Testing.</em></h2>
+          <p>Extract AST metrics, predict defect risk using multi-model machine learning with explainable AI (XAI), and synthesize automated pytest test suites.</p>
+        </div>
+        <div class="auth-form">
+          <div class="tabs">
+            <button class="tab active" data-auth="login">Sign in</button>
+            <button class="tab" data-auth="register">Create account</button>
+          </div>
+          <div id="nameWrap" class="hidden">
+            <label>Full name</label>
+            <input id="authName" placeholder="Your name">
+          </div>
+          <label>Email address</label>
+          <input id="authEmail" type="email" placeholder="name@example.com">
+          <label>Password</label>
+          <input id="authPassword" type="password" placeholder="At least 8 characters">
+          <button class="primary-btn full" id="authSubmit">Sign in →</button>
+          <p class="form-note" id="authMessage"></p>
+        </div>
+      </section>
+
+      <!-- Authenticated App Content -->
+      <section id="appContent" class="hidden">
+        
+        <!-- 1. DASHBOARD VIEW -->
+        <section class="view" id="dashboardView">
+          <div class="welcome-row">
+            <div>
+              <h2>Quality Overview & Real-Time Telemetry</h2>
+              <p>Monitor defect risks, code metrics distribution, and test execution results.</p>
+            </div>
+            <div style="display:flex;gap:10px;">
+              <button class="outline-btn" data-goto="ast">⚡ Analyze Source Code</button>
+              <button class="primary-btn" data-goto="prediction">＋ New Prediction</button>
+            </div>
+          </div>
+          <div class="stat-grid">
+            <div class="stat-card"><span>Projects</span><strong id="statProjects">0</strong><small>Active workspaces</small></div>
+            <div class="stat-card"><span>Modules Analyzed</span><strong id="statModules">0</strong><small>Total predictions</small></div>
+            <div class="stat-card"><span>High-Risk Modules</span><strong id="statRisk">0</strong><small>Require immediate tests</small></div>
+            <div class="stat-card"><span>Tests Recorded</span><strong id="statTests">0</strong><small>Autonomous executions</small></div>
+          </div>
+          <div class="content-grid">
+            <div class="panel chart-panel">
+              <div class="panel-head">
+                <div>
+                  <h3>Defect Risk Distribution</h3>
+                  <p>Categorization across High, Medium, and Low risk modules</p>
+                </div>
+                <span class="pill">LIVE DATA</span>
+              </div>
+              <canvas id="riskChart"></canvas>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>Recent Module Predictions</h3>
+                  <p>Latest assessed software components</p>
+                </div>
+              </div>
+              <div id="recentList" class="recent-list">
+                <div class="empty">No predictions yet. Run your first analysis.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. PROJECTS VIEW -->
+        <section class="view hidden" id="projectsView">
+          <div class="section-heading">
+            <div><h2>Project Workspaces</h2><p>Organize modules and test runs by application or repository.</p></div>
+          </div>
+          <div class="panel form-panel">
+            <h3>Create New Project</h3>
+            <div class="form-row">
+              <div><label>Project name</label><input id="projectName" placeholder="e.g. Core Banking Gateway"></div>
+              <div><label>Description</label><input id="projectDescription" placeholder="Short description of the system"></div>
+              <button class="primary-btn" id="createProjectBtn">Create project</button>
+            </div>
+            <p class="form-note" id="projectMessage"></p>
+          </div>
+          <div id="projectList" class="project-grid"></div>
+        </section>
+
+        <!-- 3. AST SOURCE CODE ANALYZER VIEW -->
+        <section class="view hidden" id="astView">
+          <div class="section-heading">
+            <div>
+              <h2>Source Code AST Analyzer</h2>
+              <p>Extract McCabe Cyclomatic Complexity, Lines of Code, and Code Smells directly from Python code without execution.</p>
+            </div>
+          </div>
+          
+          <div class="content-grid-wide">
+            <div class="panel form-panel">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <h3>Python Source Code</h3>
+                <div style="display:flex;gap:8px;">
+                  <select id="sampleCodeSelect" style="max-width:220px;padding:6px 10px;font-size:11px;">
+                    <option value="">Load Sample Code...</option>
+                    <option value="complex_payment">High Complexity: Payment Processor</option>
+                    <option value="auth_validator">Nested Logic: Token & Auth Validator</option>
+                    <option value="clean_math">Clean Code: Math Utils</option>
+                  </select>
+                </div>
+              </div>
+              <textarea id="astCodeInput" rows="14" class="code-editor" placeholder="# Paste your Python module source code here...&#10;def process_order(order_id, user, items, discount=0):&#10;    if not order_id:&#10;        raise ValueError('Invalid order')&#10;    total = 0&#10;    for item in items:&#10;        if item.get('valid'):&#10;            total += item.get('price', 0)&#10;    return total"></textarea>
+              
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:12px;">
+                <input type="file" id="astFileInput" accept=".py,.txt" style="max-width:240px;font-size:11px;">
+                <button class="primary-btn" id="analyzeAstBtn">⚡ Extract AST Metrics</button>
+              </div>
+              <p class="form-note" id="astMessage"></p>
+            </div>
+
+            <!-- AST Results Container -->
+            <div class="panel" id="astResultsContainer">
+              <div class="panel-head">
+                <div>
+                  <h3>Extracted Software Metrics</h3>
+                  <p id="astSummary">Paste code and click "Extract AST Metrics"</p>
+                </div>
+                <button class="primary-btn hidden" id="applyMetricsBtn" style="padding:6px 12px;font-size:11px;">Apply to Defect Prediction →</button>
+              </div>
+
+              <div id="astMetricsGrid" class="ast-metrics-grid hidden">
+                <div class="ast-card"><span>Total Lines (LOC)</span><strong id="astLoc">0</strong><small id="astSloc">0 SLOC</small></div>
+                <div class="ast-card"><span>Avg Complexity</span><strong id="astComplexity">0</strong><small id="astMaxComplexity">Max: 0</small></div>
+                <div class="ast-card"><span>Estimated Churn</span><strong id="astChurn">0</strong><small>Revisions</small></div>
+                <div class="ast-card"><span>Coupling (Imports)</span><strong id="astCoupling">0</strong><small>Dependencies</small></div>
+                <div class="ast-card"><span>Code Smells</span><strong id="astSmellsCount">0</strong><small>Anti-patterns</small></div>
+                <div class="ast-card"><span>Functions / Classes</span><strong id="astFuncClass">0 / 0</strong><small>Definitions</small></div>
+              </div>
+
+              <!-- Smells Alert Box -->
+              <div id="astSmellsBox" class="smells-container hidden" style="margin-top:15px;">
+                <h4 style="font-size:12px;margin:0 0 8px;">Detected Code Smells & Architectural Warnings:</h4>
+                <div id="astSmellsList"></div>
+              </div>
+
+              <!-- Functions Inventory Table -->
+              <div id="astFunctionsBox" class="functions-container hidden" style="margin-top:15px;">
+                <h4 style="font-size:12px;margin:0 0 8px;">Function Profiles & Cyclomatic Breakdown:</h4>
+                <div class="table-responsive">
+                  <table class="data-table" id="astFunctionsTable">
+                    <thead>
+                      <tr><th>Function</th><th>Args</th><th>LOC</th><th>McCabe Complexity</th><th>Status</th></tr>
+                    </thead>
+                    <tbody id="astFunctionsTbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. DEFECT PREDICTION VIEW -->
+        <section class="view hidden" id="predictionView">
+          <div class="section-heading">
+            <div>
+              <h2>Defect Prediction Engine</h2>
+              <p>Multi-model classification with Explainable AI (XAI) feature attribution.</p>
+            </div>
+          </div>
+
+          <div class="content-grid">
+            <div class="panel form-panel">
+              <h3>Module Metrics Assessment</h3>
+              <label>Target Project</label>
+              <select id="predictionProject"></select>
+
+              <label>Module / Component Name</label>
+              <input id="moduleName" placeholder="e.g. PaymentGatewayService">
+
+              <label>Prediction Model</label>
+              <select id="modelSelect">
+                <option value="ensemble" selected>Multi-Model Ensemble (RF + GB + LR - Recommended)</option>
+                <option value="rf">Random Forest Classifier (Ensemble Trees)</option>
+                <option value="gb">Gradient Boosting Classifier (Iterative Boosting)</option>
+                <option value="lr">Logistic Regression (Linear Probabilistic)</option>
+              </select>
+
+              <div class="metric-grid">
+                <div><label>Lines of code (LOC)</label><input id="loc" type="number" min="0" value="450"></div>
+                <div><label>Cyclomatic complexity</label><input id="complexity" type="number" min="0" step=".1" value="12"></div>
+                <div><label>Code churn (revisions)</label><input id="churn" type="number" min="0" value="18"></div>
+                <div><label>Coupling (dependencies)</label><input id="coupling" type="number" min="0" value="7"></div>
+                <div><label>Code smells count</label><input id="code_smells" type="number" min="0" value="4"></div>
+              </div>
+
+              <button class="primary-btn full" id="predictBtn">✦ Analyze Defect Risk</button>
+              <p class="form-note" id="predictionMessage"></p>
+            </div>
+
+            <!-- Prediction Result & Explainability Panel -->
+            <div class="panel result-panel">
+              <div class="eyebrow">AI INFERENCE & EXPLAINABILITY (XAI)</div>
+              <div id="resultPlaceholder" class="empty result-empty">Enter module metrics or extract them via the AST Analyzer to assess defect risk.</div>
+
+              <div id="predictionResult" class="hidden">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+                  <span id="resultModelBadge" class="pill">Ensemble</span>
+                  <div id="riskBadge" class="risk-badge">—</div>
+                </div>
+
+                <div class="risk-number" id="probability">—%</div>
+                <h3 id="resultModule" style="margin:0 0 5px;">Module</h3>
+                <p class="muted" style="margin:0 0 15px;">Estimated probability of latent software defect</p>
+
+                <div class="meter"><span id="riskMeter"></span></div>
+
+                <!-- XAI Explainability Section -->
+                <div class="xai-box">
+                  <h4 style="font-size:12px;margin:0 0 8px;">Explainable AI: Key Risk Drivers</h4>
+                  <p id="xaiSummary" style="font-size:11px;color:#55657e;line-height:1.5;margin-bottom:10px;"></p>
+                  <div id="xaiDriversList"></div>
+                </div>
+
+                <!-- Recommended Testing Strategy -->
+                <div style="margin-top:15px;">
+                  <h4 style="font-size:12px;margin:0 0 6px;">Recommended Testing Strategy</h4>
+                  <ul id="recommendations" style="margin:0;padding-left:18px;"></ul>
+                </div>
+
+                <div style="margin-top:20px;display:flex;gap:10px;">
+                  <button class="primary-btn" id="generatePytestForModuleBtn">⚡ Generate Pytest Suite →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Batch CSV Upload Panel -->
+          <div class="panel upload-panel" style="margin-top:20px;">
+            <div>
+              <h3>Batch Defect Prediction via CSV</h3>
+              <p>Upload a CSV file containing: <code>loc, complexity, churn, coupling, code_smells</code> (optional: <code>module_name</code>).</p>
+              <a href="/static/sample_metrics.csv" download>Download Sample CSV Template ↓</a>
+            </div>
+            <div class="upload-controls">
+              <select id="uploadProject"></select>
+              <input type="file" id="csvFile" accept=".csv">
+              <button class="outline-btn" id="uploadBtn">Upload & Analyze Batch</button>
+            </div>
+            <p id="uploadMessage" class="form-note"></p>
+          </div>
+        </section>
+
+        <!-- 5. AI MODEL BENCHMARK VIEW -->
+        <section class="view hidden" id="benchmarkView">
+          <div class="section-heading">
+            <div>
+              <h2>AI Model Comparison & Benchmark</h2>
+              <p>Compare Random Forest, Gradient Boosting, and Logistic Regression on Accuracy, Precision, Recall, F1, and ROC-AUC.</p>
+            </div>
+            <button class="primary-btn" id="retrainModelsBtn">↻ Retrain All Models</button>
+          </div>
+
+          <div class="stat-grid" style="margin-bottom:20px;">
+            <div class="stat-card"><span>Total Samples</span><strong id="bmTotalSamples">2,500</strong><small>Software module profiles</small></div>
+            <div class="stat-card"><span>Training Split</span><strong id="bmTrainSamples">1,875</strong><small>75% Stratified</small></div>
+            <div class="stat-card"><span>Testing Split</span><strong id="bmTestSamples">625</strong><small>25% Holdout</small></div>
+            <div class="stat-card"><span>Defect Class Ratio</span><strong id="bmDefectRatio">23.8%</strong><small>Empirical minority distribution</small></div>
+          </div>
+
+          <div class="content-grid">
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>Performance Matrix Comparison</h3>
+                  <p>Holdout evaluation across standard ML defect prediction algorithms</p>
+                </div>
+                <span class="pill">EVALUATION</span>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Algorithm</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1-Score</th><th>ROC-AUC</th></tr>
+                  </thead>
+                  <tbody id="benchmarkTableBody">
+                    <tr><td colspan="6" style="text-align:center;">Loading model benchmarks...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style="margin-top:20px;">
+                <canvas id="benchmarkChart" style="max-height:220px;"></canvas>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>Feature Importance & Attribution</h3>
+                  <p>Relative influence of software metrics across ensemble models</p>
+                </div>
+              </div>
+              <canvas id="featureImportanceChart" style="max-height:240px;"></canvas>
+              <div id="featureImportanceList" style="margin-top:15px;"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. INTELLIGENT TESTING VIEW -->
+        <section class="view hidden" id="testingView">
+          <div class="section-heading">
+            <div>
+              <h2>Autonomous Intelligent Testing</h2>
+              <p>Generate, review, and execute synthesized pytest test suites tailored to predicted defect risks.</p>
+            </div>
+          </div>
+
+          <div class="content-grid-wide">
+            <!-- Left: Test Suite Generation Configuration -->
+            <div class="panel form-panel">
+              <h3>Automated Pytest Suite Generator</h3>
+              <label>Target Project</label>
+              <select id="testProject"></select>
+
+              <label>Module Under Test</label>
+              <input id="testModule" value="PaymentService">
+
+              <label>Risk Level Prioritization</label>
+              <select id="testRiskLevel">
+                <option value="High">High Risk (Boundary, Injection, Stress & Guard Clauses)</option>
+                <option value="Medium" selected>Medium Risk (Branch Coverage, Type Safety & Boundary)</option>
+                <option value="Low">Low Risk (Happy Path & Functional Assertions)</option>
+              </select>
+
+              <button class="primary-btn full" id="generatePytestBtn">⚡ Synthesize Pytest Suite</button>
+              
+              <hr style="border:0;border-top:1px solid var(--line);margin:25px 0 15px;">
+              
+              <h3 style="font-size:13px;">Safe Built-in Runner Console</h3>
+              <p class="muted" style="margin-bottom:10px;">Execute a safe boundary assertion check to record telemetry in the project database.</p>
+              <label>Sample Validation Value</label>
+              <input id="testValue" placeholder="Enter test payload value (e.g. 42)">
+              <button class="outline-btn full" id="runTestBtn">▶ Run Validation Check</button>
+              <div id="testResult" class="test-result hidden"></div>
+            </div>
+
+            <!-- Right: Pytest Code Display & Actions -->
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3 id="generatedSuiteTitle">Generated Pytest Code</h3>
+                  <p id="generatedSuiteSummary">Click "Synthesize Pytest Suite" to generate test code.</p>
+                </div>
+                <div style="display:flex;gap:8px;">
+                  <button class="outline-btn" id="copyPytestBtn" style="padding:6px 10px;font-size:11px;">Copy Code</button>
+                  <button class="primary-btn" id="downloadPytestBtn" style="padding:6px 10px;font-size:11px;">↓ Download .py</button>
+                </div>
+              </div>
+
+              <div class="code-viewer-container">
+                <pre id="pytestCodeBlock"><code class="python"># Click "Synthesize Pytest Suite" to produce runnable test suites...</code></pre>
+              </div>
+
+              <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;">
+                <span class="muted small" id="testSuiteStats">0 test cases generated</span>
+                <button class="outline-btn" id="executeGeneratedBtn">▶ Execute Test Suite & Record</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </section>
+
+      <footer>
+        DEFECTAI · Autonomous AI Platform for Software Defect Prediction & Intelligent Testing
+        <span>Academic Demonstration System · Multi-Model ML + AST Metrics</span>
+      </footer>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
